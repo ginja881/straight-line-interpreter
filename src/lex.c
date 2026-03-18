@@ -50,7 +50,11 @@ RawToken dequeue_token(Lexer lexer) {
     return old_head;
 }
 
-
+RawToken peek(Lexer lexer) {
+     if (is_queue_empty(lexer) == TRUE)
+        return NULL;
+     return lexer->queue->token_head;
+}
 
 Lexer read_tokens(Lexer lexer, FILE* fd) {
      char* input;
@@ -146,6 +150,16 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
 	   enqueue_token(lexer, new_token);
 	  
      }
+
+     // EOF 
+     RawToken EOF_marker =  (RawToken)checked_malloc(sizeof(struct RawToken_));
+     EOF_marker->next = NULL;
+     EOF_marker->text_size = 0;
+     EOF_marker->text = "";
+     EOF_marker->token = END_OF_FILE;
+     
+
+     enqueue_token(lexer, EOF_marker);
 
      free(input);
      return lexer;

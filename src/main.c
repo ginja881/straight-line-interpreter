@@ -30,8 +30,9 @@ int main(int argc, char** argv) {
    lexer = read_tokens(lexer, fd);
      
    fclose(fd);
-
-   printf("%d", is_queue_empty(lexer));
+   
+   A_Stm AST_root = parse_source_code(lexer); 
+   
 
    return EXIT_SUCCESS;
 }

@@ -20,7 +20,8 @@ enum Token {
      SUB,
      DIV,
      MOD,
-     SEMI_COLON
+     SEMI_COLON,
+     END_OF_FILE
 };
 typedef enum Token Token;
 struct RawToken_{
@@ -52,6 +53,7 @@ int is_queue_empty(Lexer lexer);
 Lexer enqueue_token(Lexer lexer, RawToken token);
 
 RawToken dequeue_token(Lexer lexer);
+RawToken peek(Lexer lexer);
 
 Lexer read_tokens(Lexer lexer, FILE* fd);
 

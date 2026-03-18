@@ -9,6 +9,8 @@
 
 #include "symbol.h"
 #include "util.h"
+#include "lex.h"
+
 
 typedef enum {
     OP_MUL,
@@ -65,6 +67,14 @@ A_ExpList exp_list(A_Exp exp);
 // Miscellaneous functions
 int max_args_stm(A_Stm stm);
 int max_args_exp(A_ExpList exp_list);
+
+
+// Recursive Descent
+
+A_Stm parse_source_code(Lexer lexer); 
+A_Stm parse_statement(RawToken token, Lexer lexer);
+A_Exp parse_exp(RawToken token, Lexer lexer);
+A_ExpList parse_explist(RawToken token, Lexer lexer);
 
 
 

@@ -147,4 +147,42 @@ int max_args_exp(A_ExpList exp_list) {
    
 }
 
+// Recursive Descent
 
+A_Stm parse_source_code(Lexer lexer) {
+      /*
+       * @brief main recursive descent algorithm for making ASTs
+       * @param lexer Lexer object with queue token stream
+       */
+      return NULL;
+}
+
+A_Stm parse_statement(RawToken token, Lexer lexer) {
+    /*
+     * @brief helper for parse_source_code()
+     * @param token current token being read
+     * @param lexer Lexer object for peeking
+     */
+
+     return NULL;
+}
+
+A_Exp parse_exp(RawToken token, Lexer lexer) {
+     /*
+      * @brief helper for parse_source_code()
+      * @param token current token being read for new expression object
+      * @param lexer Lexer object for peeking
+      */
+
+      return NULL;
+}
+
+A_ExpList parse_explist(RawToken token, Lexer lexer) {
+     /*
+      * @brief helper for parse_exp() & parse_statement() when expression list cases are meant
+      * @param token current token being read for expression list node
+      * @param lexer Lexer object for peeking
+      */
+
+      return NULL;
+}
