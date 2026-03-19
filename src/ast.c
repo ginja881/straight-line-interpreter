@@ -46,6 +46,19 @@ A_Stm assign_stm(A_Exp id_exp, A_Exp exp) {
    return new_stm;
 }
 
+A_Stm expression_stm(A_Exp exp) {
+      /*
+       * @brief constructor for expression statements
+       * @param exp expression for expression statement
+       */
+
+       A_Stm new_stm = (A_Exp) checked_malloc(sizeof(struct A_Stm_));
+       new_stm->kind = ExpStm;
+      
+       new_stm->u.expression_stm.exp = exp;
+       return new_stm;
+}
+
 A_Exp id_exp(string id) {
     /*
      * @brief constructor for id expressions
@@ -176,30 +189,45 @@ A_Stm parse_statement(RawToken current_token, Lexer lexer) {
 	  
           main_stm = assignment_stm(id_exp, main_exp);
       }
-      else 
-           error(SYNTAX_ERROR, current_token->pos + 1);     
+      else {
+           A_Exp main_exp = parse_exp(current_token, lexer);
+	   main_stm = expression_stm(main_exp);
+      }
       return main_stm;
 }
 
 A_Stm parse_source_code(Lexer lexer) {
+    /*
+     * @brief main implementation of parser
+     * @param lexer lexical analyzer object for token stream
+     */
+    // Root of AST
     A_Stm root = NULL;
     A_Stm new_statement = NULL;
-
+    
+    // Current token
     RawToken current_token = peek(lexer);
+    
+    // Condition based off of EOF and running out of space
     while (is_queue_empty(lexer) == FALSE && current_token->token != END_OF_FILE) {
+          // Consume token
           current_token = dequeue_token(lexer);
-
+          
+	  // Make new statement and check to see if next 
 	  new_statement = parse_statement(current_token, lexer);
-	  current_token = advance(SEMI_COLON, lexer);
-
-          if (current_token == NULL) {
-	     error(SYNTAX_ERROR, current_token->pos);  
-	  }
-
+	 
+          // Check to make new compound statement
+          if (match(SEMI_COLON, lexer) == TRUE)
+	      current_token = dequeue_token(lexer);
+	  else 
+              error(SYNTAX_ERROR, current_token->pos);
+          
+	  // Check if root is null
 	  if (root == NULL) {
 	      root = compound_stm(left, NULL);
 	  }
 	  else {
+	      // Construct through cascading
 	      root = compound_stm(root, new_statement);
 	  }
 

@@ -23,11 +23,12 @@ typedef enum {
 
 // Struct defs for grammar rules
 struct A_Stm_ {
-     enum {PrintStm, CompoundStm, AssignStm} kind;
+     enum {PrintStm, CompoundStm, AssignStm, ExpStm} kind;
      union {
          struct {struct A_ExpList_* exp_list;} print_stm;
 	 struct {struct A_Stm_* stm1; struct A_Stm_* stm2;} compound_stm;
 	 struct {string id; struct A_Exp_* exp;} assign_stm;
+	 struct {struct A_Exp_* exp;} expression_stm;
      } u;
 };
 
@@ -56,6 +57,7 @@ typedef struct A_ExpList_* A_ExpList;
 A_Stm compound_stm(A_Stm stm1, A_Stm stm2);
 A_Stm print_stm(A_ExpList exp_list);
 A_Stm assign_stm(string id, A_Exp exp);
+A_Stm expression_stm(A_Exp exp);
 
 A_Exp id_exp(string id);
 A_Exp num_exp(int num);
