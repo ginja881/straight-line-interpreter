@@ -161,21 +161,24 @@ A_Exp parse_exp(RawToken current_token, Lexer lexer) {
 }
 A_Stm parse_statement(RawToken current_token, Lexer lexer) {
       // Assignment
-      if (current_token->token == ID && match(ASSIGN, lexer) == TRUE) {
+      A_Stm main_stm  = NULL;
+      if (current_token->token == PRINT) {
+           dequeue_token(lexer);
+           A_ExpList main_list = parse_explist(current_token, lexer);
+	   main_stm = print_stm(main_list);
+      }
+      else if (current_token->token == ID && match(ASSIGN, lexer) == TRUE) {
           A_Exp id_exp = parse_exp(curren_token, lexer);
 
 	  dequeue_token(lexer);
 
 	  A_Exp main_exp = parse_exp(peek(lexer), lexer);
 	  
-          return assignment_stm(id_exp, main_exp);
+          main_stm = assignment_stm(id_exp, main_exp);
       }
       else 
-           error(SYNTAX_ERROR, current_token->pos + 1);
-
-
-      
-      
+           error(SYNTAX_ERROR, current_token->pos + 1);     
+      return main_stm;
 }
 
 A_Stm parse_source_code(Lexer lexer) {
