@@ -77,41 +77,43 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
            // DRY chain for operators, parentheses, and semicolons
            if (current_char == '(') {
 	       new_token->token = L_PAREN;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == ')') {
 	       new_token->token = R_PAREN;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == '+') {
 	       new_token->token = PLUS;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == '-') {
 	       new_token->token = SUB;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == '*') {
 	       new_token->token = MUL;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == ';') {
 	       new_token->token = SEMI_COLON;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == '/') {
 	       new_token->token = DIV;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
 	   else if (current_char == '%') {
 	       new_token->token = MOD;
-	       lexer->pos++;
+	       new_token->pos = lexer->pos++;
 	   }
            // IDs, print statements, and numbers
            else if (isalnum(current_char)) {
 	       Token token_type = NUM;
 
                int i = 0;	      
+	       size_t start_pos = lexer->pos;
+
 	       for (; isalnum(current_char) && i <=99 ; i++) {
 	            if (isalpha(current_char))
 		       token_type = ID;
@@ -126,9 +128,11 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
 	           token_type = PRINT;
 	
 	       new_token->token = token_type;
+	       new_token->pos = start_pos;
+
 	   }
 	   else if (current_char == ':') {
-	      
+	      new_token->pos = lexer->pos;
 	      if ((lexer->pos + 1) > size) 
 	         error(SYNTAX_ERROR, lexer->pos);
 	      else if (input[lexer->pos + 1] == '=') {

@@ -29,7 +29,7 @@ A_Stm print_stm(A_ExpList exp_list) {
    return new_stm;
 }
 
-A_Stm assign_stm(string id, A_Exp exp) {
+A_Stm assign_stm(A_Exp id_exp, A_Exp exp) {
    /*
     * @brief constructor for assignment statements
     * @param id identifier for variable for assignment
@@ -39,7 +39,7 @@ A_Stm assign_stm(string id, A_Exp exp) {
    A_Stm new_stm =(A_Stm) checked_malloc(sizeof(struct A_Stm_));
    new_stm->kind = AssignStm;
 
-   new_stm->u.assign_stm.id = id;
+   new_stm->u.assign_stm.id = id_exp->u.id_exp.id;
    new_stm->u.assign_stm.exp = exp;
    
   
@@ -138,7 +138,7 @@ int max_args_exp(A_ExpList exp_list) {
        return 0;
 
     A_Exp exp = exp_list->exp;
-    assert(exp);
+    acase SEMIssert(exp);
 
     if (exp->kind == Eseq_Exp && exp->u.eseq_exp.stm != NULL) {
          return 1 + max(max_args_stm(exp->u.eseq_exp.stm), max_args_exp(exp_list->tail));
@@ -149,40 +149,59 @@ int max_args_exp(A_ExpList exp_list) {
 
 // Recursive Descent
 
+int match(Token token_type, Lexer lexer) {
+      return (lexer->token_head->token == token_type ? TRUE : FALSE);
+}
+A_Exp parse_exp(RawToken current_token, Lexer lexer) {
+         if (current_token->token == ID)
+	    return id_exp(current_token->text);
+	 if (current_token->token == NUM)
+	    return num_exp(atoi(current_token->text));
+
+}
+A_Stm parse_statement(RawToken current_token, Lexer lexer) {
+      // Assignment
+      if (current_token->token == ID && match(ASSIGN, lexer) == TRUE) {
+          A_Exp id_exp = parse_exp(curren_token, lexer);
+
+	  dequeue_token(lexer);
+
+	  A_Exp main_exp = parse_exp(peek(lexer), lexer);
+	  
+          return assignment_stm(id_exp, main_exp);
+      }
+      else 
+           error(SYNTAX_ERROR, current_token->pos + 1);
+
+
+      
+      
+}
+
 A_Stm parse_source_code(Lexer lexer) {
-      /*
-       * @brief main recursive descent algorithm for making ASTs
-       * @param lexer Lexer object with queue token stream
-       */
-      return NULL;
+    A_Stm root = NULL;
+    A_Stm new_statement = NULL;
+
+    RawToken current_token = peek(lexer);
+    while (is_queue_empty(lexer) == FALSE && current_token->token != END_OF_FILE) {
+          current_token = dequeue_token(lexer);
+
+	  new_statement = parse_statement(current_token, lexer);
+	  current_token = advance(SEMI_COLON, lexer);
+
+          if (current_token == NULL) {
+	     error(SYNTAX_ERROR, current_token->pos);  
+	  }
+
+	  if (root == NULL) {
+	      root = compound_stm(left, NULL);
+	  }
+	  else {
+	      root = compound_stm(root, new_statement);
+	  }
+
+    }
+    return root;
 }
 
-A_Stm parse_statement(RawToken token, Lexer lexer) {
-    /*
-     * @brief helper for parse_source_code()
-     * @param token current token being read
-     * @param lexer Lexer object for peeking
-     */
 
-     return NULL;
-}
-
-A_Exp parse_exp(RawToken token, Lexer lexer) {
-     /*
-      * @brief helper for parse_source_code()
-      * @param token current token being read for new expression object
-      * @param lexer Lexer object for peeking
-      */
-
-      return NULL;
-}
-
-A_ExpList parse_explist(RawToken token, Lexer lexer) {
-     /*
-      * @brief helper for parse_exp() & parse_statement() when expression list cases are meant
-      * @param token current token being read for expression list node
-      * @param lexer Lexer object for peeking
-      */
-
-      return NULL;
-}

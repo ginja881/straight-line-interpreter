@@ -27,6 +27,7 @@ typedef enum Token Token;
 struct RawToken_{
     Token token;
     string text;
+    size_t pos;
     size_t text_size;
     struct RawToken_* next;
 };
