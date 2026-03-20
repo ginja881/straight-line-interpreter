@@ -29,7 +29,7 @@ A_Stm print_stm(A_ExpList exp_list) {
    return new_stm;
 }
 
-A_Stm assign_stm(A_Exp id_exp, A_Exp exp) {
+A_Stm assign_stm(string id, A_Exp exp) {
    /*
     * @brief constructor for assignment statements
     * @param id identifier for variable for assignment
@@ -39,7 +39,7 @@ A_Stm assign_stm(A_Exp id_exp, A_Exp exp) {
    A_Stm new_stm =(A_Stm) checked_malloc(sizeof(struct A_Stm_));
    new_stm->kind = AssignStm;
 
-   new_stm->u.assign_stm.id = id_exp->u.id_exp.id;
+   new_stm->u.assign_stm.id = id;
    new_stm->u.assign_stm.exp = exp;
    
   
@@ -52,7 +52,7 @@ A_Stm expression_stm(A_Exp exp) {
        * @param exp expression for expression statement
        */
 
-       A_Stm new_stm = (A_Exp) checked_malloc(sizeof(struct A_Stm_));
+       A_Stm new_stm = (A_Stm) checked_malloc(sizeof(struct A_Stm_));
        new_stm->kind = ExpStm;
       
        new_stm->u.expression_stm.exp = exp;
@@ -151,7 +151,7 @@ int max_args_exp(A_ExpList exp_list) {
        return 0;
 
     A_Exp exp = exp_list->exp;
-    acase SEMIssert(exp);
+    assert(exp);
 
     if (exp->kind == Eseq_Exp && exp->u.eseq_exp.stm != NULL) {
          return 1 + max(max_args_stm(exp->u.eseq_exp.stm), max_args_exp(exp_list->tail));
@@ -162,77 +162,167 @@ int max_args_exp(A_ExpList exp_list) {
 
 // Recursive Descent
 
+
+BinOp get_op(Token token_type) {
+    if (token_type == PLUS)
+       return OP_ADD;
+    else if (token_type == SUB)
+       return OP_SUB;
+    else if (token_type == MUL)
+       return OP_MUL;
+    return OP_DIV;
+
+}
+
 int match(Token token_type, Lexer lexer) {
-      return (lexer->token_head->token == token_type ? TRUE : FALSE);
+      /*
+       * @brief matching for parser
+       * @param token_type type of token
+       * @param lexer lexical analyzer object
+       */
+      return (peek(lexer)->token == token_type ? TRUE : FALSE);
 }
-A_Exp parse_exp(RawToken current_token, Lexer lexer) {
-         if (current_token->token == ID)
-	    return id_exp(current_token->text);
-	 if (current_token->token == NUM)
-	    return num_exp(atoi(current_token->text));
-
-}
-A_Stm parse_statement(RawToken current_token, Lexer lexer) {
-      // Assignment
-      A_Stm main_stm  = NULL;
-      if (current_token->token == PRINT) {
-           dequeue_token(lexer);
-           A_ExpList main_list = parse_explist(current_token, lexer);
-	   main_stm = print_stm(main_list);
+A_Exp parse_literal(Lexer lexer) {
+       A_Exp exp = NULL;
+       
+       RawToken current_token = peek(lexer);
+       if (match(ID, lexer) == TRUE) {
+           exp = id_exp(current_token->text);
+	   eat_token(lexer);
       }
-      else if (current_token->token == ID && match(ASSIGN, lexer) == TRUE) {
-          A_Exp id_exp = parse_exp(curren_token, lexer);
+       else if (match(NUM, lexer) == TRUE) {
+           exp = num_exp(atoi(current_token->text));
+	   eat_token(lexer);
+       }
+       else if (match(L_PAREN, lexer) == TRUE) {
+            eat_token(lexer);
+	    exp = parse_expression(lexer);
+	    if (match(R_PAREN, lexer) == FALSE)
+	       // Error/bug?
+	       error(SYNTAX_ERROR, (peek(lexer))->pos);
+	    eat_token(lexer);
 
-	  dequeue_token(lexer);
+       }
+       else
+           error(SYNTAX_ERROR, current_token->pos);
+       return exp;
 
-	  A_Exp main_exp = parse_exp(peek(lexer), lexer);
+}
+
+A_Exp parse_factor(Lexer lexer) {
+      A_Exp left = parse_literal(lexer);
+      while (match(PLUS, lexer) == TRUE || match(SUB, lexer) == TRUE) {
+           RawToken current_token = eat_token(lexer);
+           BinOp operator = get_op(current_token->token);
+	   A_Exp right = parse_factor(lexer);
+           left = op_exp(left, operator, right);
+      }
+      return left;
+}
+
+A_Exp parse_term(Lexer lexer) {
+     A_Exp left = parse_factor(lexer);
+     while (match(MUL, lexer) == TRUE || match(DIV, lexer) == TRUE) {
+         RawToken current_token = eat_token(lexer);
+	 BinOp operator = get_op(current_token->token);
+	 A_Exp right = parse_term(lexer);
+	 left = op_exp(left, operator, right);
+     }
+     return left;
+}
+
+A_Exp parse_expression(Lexer lexer) {
+     return parse_term(lexer);
+}
+A_ExpList parse_expression_list(Lexer lexer) {
+      
+     
+      A_ExpList head = exp_list(parse_expression(lexer));
+      A_ExpList node = head;
+      while (match(COMMA, lexer) == TRUE) {
+           node->tail = exp_list(parse_expression(lexer));
+	   node = node->tail;
+
+	   if (match(R_PAREN, lexer) == TRUE)
+	      eat_token(lexer);
+           else
+	      break;
+      }
+      return head;
+}
+A_Stm parse_statement(Lexer lexer) {
+     A_Stm main_stm = NULL;
+     RawToken current_token = peek(lexer);
+     // The fuck?
+     
+     if (current_token->token == PRINT) {
+          eat_token(lexer);
+	  if (peek(lexer)->token != L_PAREN)
+	     error(SYNTAX_ERROR, (peek(lexer))->pos);
+
+	  eat_token(lexer);
+	  A_ExpList expression_list = parse_expression_list(lexer);
+	  if (match(R_PAREN, lexer) == TRUE) {
+	     eat_token(lexer);
+	     main_stm = print_stm(expression_list);
+	  }
+	  else
+	     error(SYNTAX_ERROR, (peek(lexer))->pos);
+     }
+     else if (current_token->token == ID) {
+           string id = current_token->text;
+	   eat_token(lexer);
+	   if (peek(lexer)->token !=ASSIGN)
+	      error(SYNTAX_ERROR, (peek(lexer))->pos);
+
+	   eat_token(lexer);
+           
+	   A_Exp main_exp = parse_expression(lexer);
 	  
-          main_stm = assignment_stm(id_exp, main_exp);
-      }
-      else {
-           A_Exp main_exp = parse_exp(current_token, lexer);
-	   main_stm = expression_stm(main_exp);
-      }
-      return main_stm;
+	   main_stm = assign_stm(id, main_exp);
+     }
+     else if (current_token->token == NUM) {
+          A_Exp main_exp = parse_expression(lexer);
+	  main_stm = expression_stm(main_exp);
+     }
+     else
+         error(SYNTAX_ERROR, current_token->pos);
+
+     return main_stm;
 }
 
 A_Stm parse_source_code(Lexer lexer) {
-    /*
-     * @brief main implementation of parser
-     * @param lexer lexical analyzer object for token stream
-     */
-    // Root of AST
-    A_Stm root = NULL;
-    A_Stm new_statement = NULL;
-    
-    // Current token
-    RawToken current_token = peek(lexer);
-    
-    // Condition based off of EOF and running out of space
-    while (is_queue_empty(lexer) == FALSE && current_token->token != END_OF_FILE) {
-          // Consume token
-          current_token = dequeue_token(lexer);
-          
-	  // Make new statement and check to see if next 
-	  new_statement = parse_statement(current_token, lexer);
-	 
-          // Check to make new compound statement
-          if (match(SEMI_COLON, lexer) == TRUE)
-	      current_token = dequeue_token(lexer);
-	  else 
-              error(SYNTAX_ERROR, current_token->pos);
-          
-	  // Check if root is null
-	  if (root == NULL) {
-	      root = compound_stm(left, NULL);
-	  }
-	  else {
-	      // Construct through cascading
-	      root = compound_stm(root, new_statement);
-	  }
+      /*
+       * @brief main parsing algorithm
+       * @param lexer Lexical analyzer object
+       */
 
-    }
-    return root;
+      // Root and current_stm for tracking
+      A_Stm root = NULL;
+      A_Stm current_stm = NULL;
+      
+      // Sentinel for consuming/matching tokens
+      RawToken current_token = peek(lexer);
+      while (is_queue_empty(lexer) == FALSE && current_token->token != END_OF_FILE) {
+               // Make STM
+	      
+               current_stm = parse_statement(lexer);
+	       // Check for compound statement
+	       current_token = peek(lexer);
+	       if (match(SEMI_COLON, lexer) == TRUE) {
+	            eat_token(lexer);
+		    // Root case
+	            if (root == NULL)
+		        root = current_stm;
+		    else
+		        root = compound_stm(root, current_stm);
+	       }
+	       else
+	          error(SYNTAX_ERROR, current_token->pos);
+	       // Update reference to stream front
+	       current_token = peek(lexer);
+      }
+      return root;
 }
 
 

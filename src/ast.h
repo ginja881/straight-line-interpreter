@@ -16,8 +16,7 @@ typedef enum {
     OP_MUL,
     OP_DIV,
     OP_ADD,
-    OP_SUB,
-    OP_MOD
+    OP_SUB
 } BinOp;
 
 
@@ -73,17 +72,22 @@ int max_args_exp(A_ExpList exp_list);
 
 // Recursive Descent
 
+BinOp get_op(Token token_type);
+
 int match(Token token_type, Lexer lexer);
 
-A_Stm parse_statement(RawToken token, Lexer lexer);
-A_Exp parse_factor(RawToken token, Lexer lexer);
-A_Exp parse_expression(RawToken token, Lexer lexer);
 
 
+
+A_Exp parse_literal(Lexer lexer);
+A_Exp parse_factor(Lexer lexer);
+A_Exp parse_term(Lexer lexer);
+
+A_ExpList parse_expression_list(Lexer lexer);
+
+A_Exp parse_expression(Lexer lexer);
+A_Stm parse_statement(Lexer lexer);
 A_Stm parse_source_code(Lexer lexer);
-
-
-
 
 
 #endif

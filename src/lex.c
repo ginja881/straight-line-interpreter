@@ -32,7 +32,7 @@ Lexer enqueue_token(Lexer lexer, RawToken token) {
     return lexer;
 }
 
-RawToken dequeue_token(Lexer lexer) {
+RawToken eat_token(Lexer lexer) {
     if (is_queue_empty(lexer) == TRUE) {
         perror("\nLexer tried dequeuing while empty\n");
 	return NULL;
@@ -54,6 +54,10 @@ RawToken peek(Lexer lexer) {
      if (is_queue_empty(lexer) == TRUE)
         return NULL;
      return lexer->queue->token_head;
+}
+
+RawToken next_token(Lexer lexer) {
+    return lexer->queue->token_head->next;
 }
 
 Lexer read_tokens(Lexer lexer, FILE* fd) {
@@ -103,8 +107,8 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
 	       new_token->token = DIV;
 	       new_token->pos = lexer->pos++;
 	   }
-	   else if (current_char == '%') {
-	       new_token->token = MOD;
+	   else if (current_char == ',') {
+	       new_token->token = COMMA;
 	       new_token->pos = lexer->pos++;
 	   }
            // IDs, print statements, and numbers

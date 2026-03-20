@@ -3,11 +3,11 @@
 
 int main(void) {
     Lexer lexer = make_lexer();
-    FILE* fd = fopen("tests/source_files/first.straight", "r");
+    FILE* fd = fopen("tests/source_files/second.straight", "r");
     read_tokens(lexer, fd);
 
     while (is_queue_empty(lexer) != TRUE) {
-         RawToken raw_token = dequeue_token(lexer);
+         RawToken raw_token = eat_token(lexer);
          assert(raw_token);
          char* token_type;
 	 switch (raw_token->token) {
@@ -41,11 +41,14 @@ int main(void) {
 	      case DIV:
 	         token_type = "DIV";
 		 break;
-	      case MOD:
-	         token_type = "MOD";
+	      case COMMA:
+	         token_type = "COMMA";
 		 break;
 	      case NUM:
 	         token_type ="NUM";
+		 break;
+             case END_OF_FILE:
+	         token_type ="EOF";
 		 break;
 	 }
 

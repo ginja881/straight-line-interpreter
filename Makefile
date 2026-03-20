@@ -12,3 +12,6 @@ $(build_dir)/$(test_dir)/test_symbol_table.o:
 
 $(build_dir)/$(test_dir)/test_lex.o:
 	$(CC) $(CFLAGS) -I$(SRC_DIR) $(SRC_DIR)/lex.c $(SRC_DIR)/util.c $(test_dir)/test_lex.c -o $@
+
+$(build_dir)/$(test_dir)/test_ast.o:
+	$(CC) $(CFLAGS) -I$(SRC_DIR) $(SRC_DIR)/util.c $(SRC_DIR)/lex.c $(SRC_DIR)/ast.c $(test_dir)/test_ast.c -o $@

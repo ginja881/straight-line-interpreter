@@ -19,7 +19,7 @@ enum Token {
      PLUS, 
      SUB,
      DIV,
-     MOD,
+     COMMA,
      SEMI_COLON,
      END_OF_FILE
 };
@@ -53,8 +53,9 @@ Lexer make_lexer(void);
 int is_queue_empty(Lexer lexer);
 Lexer enqueue_token(Lexer lexer, RawToken token);
 
-RawToken dequeue_token(Lexer lexer);
+RawToken eat_token(Lexer lexer);
 RawToken peek(Lexer lexer);
+RawToken next_token(Lexer lexer);
 
 Lexer read_tokens(Lexer lexer, FILE* fd);
 
