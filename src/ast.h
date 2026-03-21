@@ -72,7 +72,7 @@ int max_args_exp(A_ExpList exp_list);
 
 // Recursive Descent
 
-BinOp get_op(Token token_type);
+BinOp get_op(Token operator);
 
 int match(Token token_type, Lexer lexer);
 

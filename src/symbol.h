@@ -34,7 +34,7 @@ typedef struct HashTable_* HashTable;
 
 SymbolEntry make_new_entry(string id, int num);
 
-HashTable make_new_hash_table(size_t capacity);
+HashTable make_new_hash_table();
 int is_empty(HashTable table);
 HashTable resize(HashTable old_table, size_t new_capacity);
 

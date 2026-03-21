@@ -3,7 +3,7 @@
 #include "lex.h"
 
 int main(void) {
-     char* f_path = "tests/source_files/second.straight";
+     char* f_path = "tests/source_files/first.straight";
      FILE* fd = fopen(f_path, "r");
      Lexer lexer = make_lexer();
      lexer = read_tokens(lexer, fd);

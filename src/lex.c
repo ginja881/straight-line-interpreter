@@ -67,7 +67,7 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
     
      while(input[lexer->pos] != '\0') {
            char current_char = input[lexer->pos];
-           if (isspace(current_char) || current_char == ',') {
+           if (isspace(current_char)) {
 	       lexer->pos++;
 	       continue;
 	   }

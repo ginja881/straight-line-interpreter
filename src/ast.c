@@ -161,17 +161,16 @@ int max_args_exp(A_ExpList exp_list) {
 }
 
 // Recursive Descent
-
-
-BinOp get_op(Token token_type) {
-    if (token_type == PLUS)
-       return OP_ADD;
-    else if (token_type == SUB)
-       return OP_SUB;
-    else if (token_type == MUL)
-       return OP_MUL;
+BinOp get_op(Token operator) {
+    switch(operator) {
+          case PLUS:
+	     return OP_ADD;
+	  case SUB:
+	     return OP_SUB;
+	  case MUL:
+	     return OP_MUL;
+    }
     return OP_DIV;
-
 }
 
 int match(Token token_type, Lexer lexer) {
@@ -214,7 +213,7 @@ A_Exp parse_factor(Lexer lexer) {
       while (match(PLUS, lexer) == TRUE || match(SUB, lexer) == TRUE) {
            RawToken current_token = eat_token(lexer);
            BinOp operator = get_op(current_token->token);
-	   A_Exp right = parse_factor(lexer);
+	   A_Exp right = parse_expression(lexer);
            left = op_exp(left, operator, right);
       }
       return left;
@@ -225,7 +224,7 @@ A_Exp parse_term(Lexer lexer) {
      while (match(MUL, lexer) == TRUE || match(DIV, lexer) == TRUE) {
          RawToken current_token = eat_token(lexer);
 	 BinOp operator = get_op(current_token->token);
-	 A_Exp right = parse_term(lexer);
+	 A_Exp right = parse_expression(lexer);
 	 left = op_exp(left, operator, right);
      }
      return left;
@@ -282,10 +281,9 @@ A_ExpList parse_expression_list(Lexer lexer) {
       A_ExpList head = exp_list(parse_expression(lexer));
       A_ExpList node = head;
       while (match(COMMA, lexer) == TRUE) {
+           eat_token(lexer);
            node->tail = exp_list(parse_expression(lexer));
 	   node = node->tail;
-
-	   eat_token(lexer);
       }
 
       return head;

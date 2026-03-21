@@ -19,6 +19,7 @@
 typedef const char*  string;
 
 string String(char* text);
+
 void* checked_malloc(size_t size);
 int max(int a, int b);
 int min(int a, int b);

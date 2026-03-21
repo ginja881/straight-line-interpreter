@@ -9,9 +9,9 @@ SymbolEntry make_new_entry(string id, int num) {
     
     return symbol_entry;
 }
-HashTable make_new_hash_table(size_t capacity) {
+HashTable make_new_hash_table() {
        HashTable hash_table = (HashTable) checked_malloc(sizeof(struct HashTable_));
-       SymbolEntry* bucket_array = (SymbolEntry*) checked_malloc(sizeof(struct  SymbolEntry_) * capacity);
+       SymbolEntry* bucket_array = (SymbolEntry*) checked_malloc(sizeof(struct  SymbolEntry_) * DEFAULT_CAPACITY);
        for (size_t i = 0; i < capacity; i++)
            bucket_array[i] = NULL;
 

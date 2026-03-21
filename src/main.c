@@ -4,10 +4,6 @@
 #include "symbol.h"
 
 
-void interp_program(A_Stm ast_root);
-
-
-
 int main(int argc, char** argv) {
    if (argc < 2) {
        perror("Need to specify .straight file");
@@ -31,8 +27,10 @@ int main(int argc, char** argv) {
      
    fclose(fd);
    
-   A_Stm AST_root = parse_source_code(lexer); 
    
+   A_Stm AST_root = parse_source_code(lexer); 
+   HashTable symbol_table = make_hash_table();
+
 
    return EXIT_SUCCESS;
 }
