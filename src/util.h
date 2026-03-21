@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 
+
 #define TRUE 1
 #define FALSE 0
 
@@ -24,6 +25,6 @@ void* checked_malloc(size_t size);
 int max(int a, int b);
 int min(int a, int b);
 
-void error(int error_code, int position);
+void error(int error_code, size_t pos, string text);
 
 #endif

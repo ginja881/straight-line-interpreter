@@ -1,8 +1,8 @@
+#include "util.h"
 #include "lex.h"
 #include "ast.h"
-#include "util.h"
 #include "symbol.h"
-
+#include "eval.h"
 
 int main(int argc, char** argv) {
    if (argc < 2) {
@@ -11,17 +11,20 @@ int main(int argc, char** argv) {
    }
    
    // Checking if file has valid extension 
-   char* file = argv[1];
-   char* save_ptr;
-   char* extension = strtok_r(argv[1], ".", &save_ptr);
-   if (strcmp(extension,  "straight") != 0) {
-        perror("Invalid file, must be .straight file");
-	return EXIT_FAILURE;
+   string extension = strrchr(argv[1], '.');
+   if (!extension) {
+       perror("Must specify .straight file");
+       return EXIT_FAILURE;
    }
+   if (strcmp(extension + 1, "straight") != 0) {
+       perror("Must specify .straight file");
+       return EXIT_FAILURE;
+   }
+      
 
    // Lexical Analysis
    Lexer lexer = make_lexer();
-   FILE* fd = fopen(file, "r");
+   FILE* fd = fopen(argv[1], "r");
    
    lexer = read_tokens(lexer, fd);
      
@@ -29,8 +32,9 @@ int main(int argc, char** argv) {
    
    
    A_Stm AST_root = parse_source_code(lexer); 
-   HashTable symbol_table = make_hash_table();
-
+   HashTable symbol_table = make_new_hash_table(DEFAULT_CAPACITY);
+   
+   symbol_table = interpProgram(AST_root, symbol_table);
 
    return EXIT_SUCCESS;
 }

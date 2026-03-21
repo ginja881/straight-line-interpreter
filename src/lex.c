@@ -61,7 +61,7 @@ RawToken next_token(Lexer lexer) {
 }
 
 Lexer read_tokens(Lexer lexer, FILE* fd) {
-     char* input;
+     char* input = NULL;
      size_t size = 0;
      getline(&input, &size, fd);
     
@@ -137,23 +137,25 @@ Lexer read_tokens(Lexer lexer, FILE* fd) {
 	   }
 	   else if (current_char == ':') {
 	      new_token->pos = lexer->pos;
-	      if ((lexer->pos + 1) > size) 
-	         error(SYNTAX_ERROR, lexer->pos);
-	      else if (input[lexer->pos + 1] == '=') {
+	      if ((lexer->pos + 1) < size && input[lexer->pos + 1] == '=') {
 	           new_token->token = ASSIGN;
 		   lexeme[1] = '=';
 		   new_token->text_size++;
 		   lexer->pos += 2;
               }
-              else
-	          error(SYNTAX_ERROR, lexer->pos);
-	           
+              else {
+		  lexeme[1] = '\0';
+	          error(INVALID_CHARACTER, lexer->pos, String(lexeme));
+	      }
 	   }
-	   else 
-	      error(INVALID_CHARACTER, lexer->pos);
+	   else {
+	      lexeme[1] = '\0';
+	      error(INVALID_CHARACTER, lexer->pos, String(lexeme));
+	   }
            lexeme[new_token->text_size] = '\0';
+	  
            new_token->text = String(lexeme);
-
+           free(lexeme);
     
 	   enqueue_token(lexer, new_token);
 	  

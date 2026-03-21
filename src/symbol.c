@@ -9,9 +9,9 @@ SymbolEntry make_new_entry(string id, int num) {
     
     return symbol_entry;
 }
-HashTable make_new_hash_table() {
+HashTable make_new_hash_table(size_t capacity) {
        HashTable hash_table = (HashTable) checked_malloc(sizeof(struct HashTable_));
-       SymbolEntry* bucket_array = (SymbolEntry*) checked_malloc(sizeof(struct  SymbolEntry_) * DEFAULT_CAPACITY);
+       SymbolEntry* bucket_array = (SymbolEntry*) checked_malloc(sizeof(struct  SymbolEntry_) * capacity);
        for (size_t i = 0; i < capacity; i++)
            bucket_array[i] = NULL;
 
@@ -33,7 +33,7 @@ HashTable resize(HashTable old_table, size_t new_capacity) {
       HashTable new_table = make_new_hash_table(new_capacity);
       
       assert(new_table);
-      printf("work");
+      
       for (size_t i = 0; i < old_table->capacity; i++) {
             SymbolEntry current = old_table->data[i];
 	    while (current != NULL) {
@@ -41,7 +41,7 @@ HashTable resize(HashTable old_table, size_t new_capacity) {
 		  current = current->next_item;
 	    }
       }
-      new_table->size = old_table->size;
+      
 
       free(old_table->data);
       free(old_table);
@@ -54,13 +54,13 @@ HashTable resize(HashTable old_table, size_t new_capacity) {
 int hash(string key, HashTable table) {
      
      
+      size_t string_size = strlen(key);
       int hash_code = 0;
-      for (size_t i = 0; i < sizeof(key); i++) {
-            int current_ascii = (int)key[i];
-	   
-            hash_code += current_ascii * i * HASH_CONSTANT;
-      }
-      return hash_code % (table->capacity);
+      for (size_t i = 0; i < string_size; i++) {
+          
+	  hash_code += (hash_code * HASH_CONSTANT + (unsigned long)key[i]) % (table->capacity);
+      }     
+      return (int)((hash_code));
 }
 
 int lookup(string key, HashTable table) { 
@@ -85,24 +85,32 @@ HashTable update(string id, int value, HashTable table) {
      int location = hash(id, table);
      SymbolEntry symbol_entry = table->data[location];
     
+     if (symbol_entry == NULL) {
+         printf("Inserting at %d", location);
+         table->data[location] = make_new_entry(id, value);
+	 printf("Success");
+	 table->size++;
+	 return table;
+     }
     
-     while (symbol_entry != NULL) {
+     while (1) {
           if (strcmp(symbol_entry->id, id) == 0) {
 	       symbol_entry->num = value;
 	       return table;
 	  }
-
+           
 	  if (symbol_entry->next_item == NULL) {
-	       symbol_entry->next_item = make_new_entry(id, value);
-	       table->size++;
-	       return table;
+	      printf("Inserting at %d", location);
+	      symbol_entry->next_item = make_new_entry(id, value);
+	      printf("Success");
+	      table->size++;
+	      return table;
 	  }
-	  else
-	      symbol_entry = symbol_entry->next_item;
+	  symbol_entry = symbol_entry->next_item;
      }
      
-     table->data[location] = make_new_entry(id, value);
-     table->size++;
+     
+    
 
      return table;
 }

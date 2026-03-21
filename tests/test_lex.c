@@ -3,7 +3,7 @@
 
 int main(void) {
     Lexer lexer = make_lexer();
-    FILE* fd = fopen("tests/source_files/second.straight", "r");
+    FILE* fd = fopen("tests/source_files/first.straight", "r");
     read_tokens(lexer, fd);
 
     while (is_queue_empty(lexer) != TRUE) {

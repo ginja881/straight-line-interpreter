@@ -1,7 +1,8 @@
 #include "util.h"
 
 string String(char* text) {
-     return (string) text;
+     // Allocate new string
+     return strdup(text);
 }
 
 void* checked_malloc(size_t size) {
@@ -18,14 +19,24 @@ int min(int a, int b) {
    return (a < b) ? a : b;
 }
 
-void error(int error_code, int pos) {
+void error(int error_code, size_t pos, string text) {
     switch(error_code) {
         
 	case SYNTAX_ERROR:
-	    fprintf(stderr, "Syntax error at %d", pos);
+	    fprintf(
+	    	stderr, 
+	    	"\n(SYNTAX_ERROR) pos=%ld, text=%s\n", 
+		pos,
+                text
+	    );
 	    break;
         case INVALID_CHARACTER:
-	    fprintf(stderr, "Invalid character at %d", pos);
+	    fprintf(
+	    	stderr, 
+	    	"\nInvalid character at pos=%ld, text=%s\n", 
+	    	pos,
+		text
+	    );
 	    break;
     }
     _Exit(-1);

@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctypes.h>
 #include <stdlib.h>
 #include "util.h"
 #include "ast.h"
@@ -16,12 +15,13 @@ struct ExpressionResult_ {
        HashTable table;
 };
 
-typedef struct ExpressionResult_* ExpressionResult;
+typedef struct ExpressionResult_ ExpressionResult;
 
-ExpressionResult interpExp(A_Exp exp);
-HashTable interpExpList(A_ExpList expression_list);
-HashTable interpStatement(A_Stm statement);
 
-void interpProgram(A_Stm AST_root);
+ExpressionResult interpExp(A_Exp exp, HashTable symbol_table);
+HashTable interpExpList(A_ExpList expression_list, HashTable symbol_table, int print);
+HashTable interpStatement(A_Stm statement, HashTable symbol_table);
+
+HashTable interpProgram(A_Stm AST_root, HashTable symbol_table);
 
 #endif
