@@ -130,6 +130,5 @@ HashTable interpProgram(A_Stm AST_Root, HashTable symbol_table) {
 	        break;
        }
        return interpStatement(AST_Root, symbol_table);
-       
-       return interpStatement(AST_Root, symbol_table);
+      
 }
